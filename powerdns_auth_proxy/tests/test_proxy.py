@@ -12,6 +12,30 @@ import requests
 
 from powerdns_auth_proxy import create_app
 
+# Config for tests that are rejected before any backend request is made
+# (authentication and zone-creation authorisation), so they need no live
+# PowerDNS backend and can use a standalone client.
+AUTHZ_CONFIG = """
+[pdns]
+api-url = http://127.0.0.1:1
+
+[user:withsuffix]
+key = 11111111111111111111111111111111
+allow-suffix-creation = allowed.example.
+
+[user:nosuffix]
+key = 22222222222222222222222222222222
+
+[user:emptykey]
+key =
+"""
+
+
+def authz_client():
+    app = create_app(AUTHZ_CONFIG)
+    app.config["TESTING"] = True
+    return app.test_client()
+
 
 def api_key_header(client):
     """
@@ -179,6 +203,43 @@ def test_api_auth_non_ascii(client):
             "/api/v1/servers", headers={"Authorization": "Basic %s" % encoded}
         )
         assert response.status_code == 401
+
+
+def test_api_zone_create_denied_without_suffix_rule():
+    # A user with no allow-suffix-creation rule must not be able to create any
+    # zone (default deny). Previously the permission check was skipped entirely
+    # for such users, letting them create arbitrary zones.
+    client = authz_client()
+    response = client.post(
+        "/api/v1/servers/localhost/zones",
+        headers={"X-API-Key": "nosuffix:22222222222222222222222222222222"},
+        json={"name": "unauthorized.example.", "kind": "Master"},
+    )
+    assert response.status_code == 403
+
+
+def test_api_zone_create_without_name_is_bad_request():
+    # A create request with no "name" must be a clean 400, not a 500 crash.
+    client = authz_client()
+    response = client.post(
+        "/api/v1/servers/localhost/zones",
+        headers={"X-API-Key": "withsuffix:11111111111111111111111111111111"},
+        json={"kind": "Master"},
+    )
+    assert response.status_code == 400
+
+
+def test_api_empty_configured_key_rejected():
+    # A user configured with an empty key must not be authenticatable with an
+    # empty password, via either authentication method.
+    client = authz_client()
+    response = client.get("/api/v1/servers", headers={"X-API-Key": "emptykey:"})
+    assert response.status_code == 401
+    encoded = base64.b64encode(b"emptykey:").decode("ascii")
+    response = client.get(
+        "/api/v1/servers", headers={"Authorization": "Basic %s" % encoded}
+    )
+    assert response.status_code == 401
 
 
 def test_api_zone_create(client):

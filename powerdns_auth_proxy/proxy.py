@@ -5,7 +5,7 @@ from functools import wraps
 from flask import Blueprint, Response, current_app, g, request
 from requests import Request, Session
 from requests.structures import CaseInsensitiveDict
-from werkzeug.exceptions import Forbidden, NotFound
+from werkzeug.exceptions import BadRequest, Forbidden, NotFound
 
 bp = Blueprint("proxy", __name__, url_prefix="/api")
 
@@ -93,6 +93,9 @@ def authenticate(f):
         if (
             authentication_method not in ("key", "basic")
             or username not in current_app.config["USERS"]
+            # reject users configured with an empty key so they cannot be
+            # authenticated with an empty password
+            or not current_app.config["USERS"][username]["key"]
             # compare as bytes: compare_digest rejects non-ASCII str arguments
             or not hmac.compare_digest(
                 current_app.config["USERS"][username]["key"].encode("utf-8"),
@@ -239,25 +242,30 @@ def zone_list():
         return zones
     elif request.method == "POST":
         requested_name = g.json.get("name", None)
-        if "allow-suffix-creation" in g.user:
-            allowed_suffixes = (
-                g.user["allow-suffix-creation"]
-                if isinstance(g.user["allow-suffix-creation"], list)
-                else [g.user["allow-suffix-creation"]]
-            )
-            allowed = False
-            for suffix in allowed_suffixes:
-                if suffix.startswith(".") and requested_name.lower().endswith(
-                    suffix.lower()
-                ):
-                    allowed = True
-                elif (
-                    not suffix.startswith(".")
-                    and requested_name.lower() == suffix.lower()
-                ):
-                    allowed = True
-            if allowed is not True:
-                raise Forbidden
+        if not isinstance(requested_name, str):
+            raise BadRequest("Zone creation requires a 'name' string.")
+
+        # Default deny: a zone may only be created if the user has an
+        # allow-suffix-creation rule that explicitly permits this name.
+        # Users with no such rule (or an empty one) cannot create zones.
+        suffix_config = g.user.get("allow-suffix-creation", [])
+        allowed_suffixes = (
+            suffix_config if isinstance(suffix_config, list) else [suffix_config]
+        )
+        allowed = False
+        for suffix in allowed_suffixes:
+            if not suffix:
+                continue
+            if suffix.startswith(".") and requested_name.lower().endswith(
+                suffix.lower()
+            ):
+                allowed = True
+            elif (
+                not suffix.startswith(".") and requested_name.lower() == suffix.lower()
+            ):
+                allowed = True
+        if allowed is not True:
+            raise Forbidden
 
         g.json = sanitise_metadata_updates(g.json, current_app.config["PDNS"])
         return proxy_to_backend("POST", "zones", json.dumps(dict(g.json)))
