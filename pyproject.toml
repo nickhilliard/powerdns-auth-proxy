@@ -1,34 +1,55 @@
 [build-system]
-requires = ["setuptools>=61"]
+requires = ["setuptools>=77"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "powerdns-auth-proxy"
 version = "0.1"
 description = "Authenticating proxy for PowerDNS's HTTP API"
+readme = "README.md"
+license = "GPL-3.0-or-later"
+license-files = ["LICENSE"]
 authors = [
     { name = "Catalyst OpsDev", email = "opsdev@catalyst.net.nz" },
 ]
+requires-python = ">=3.9"
 dependencies = [
     "Flask~=2.0",
     "requests~=2.0",
 ]
 classifiers = [
     "Development Status :: 2 - Pre-Alpha",
+    "Framework :: Flask",
+    "Intended Audience :: System Administrators",
     "Natural Language :: English",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.6",
-    "Programming Language :: Python :: 3.7",
-]
-
-[project.optional-dependencies]
-dev = [
-    "pytest",
-    "pytest-flask",
+    "Programming Language :: Python :: 3 :: Only",
+    "Topic :: Internet :: Name Service (DNS)",
 ]
 
 [project.urls]
-Homepage = "https://github.com/catalyst/powerdns-auth-proxy"
+Homepage = "https://github.com/nickhilliard/powerdns-auth-proxy"
+Upstream = "https://github.com/catalyst/powerdns-auth-proxy"
+
+[dependency-groups]
+test = [
+    "pytest",
+    "pytest-flask",
+]
+lint = [
+    "flake8",
+    "black",
+    "isort",
+]
+dev = [
+    { include-group = "test" },
+    { include-group = "lint" },
+]
 
 [tool.setuptools]
 packages = ["powerdns_auth_proxy"]
+
+[tool.isort]
+profile = "black"
+known_first_party = ["powerdns_auth_proxy"]
+no_lines_before = ["LOCALFOLDER"]
