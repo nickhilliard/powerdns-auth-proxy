@@ -27,6 +27,8 @@ allow-suffix-creation = example.org.
 
 This specifies the API key and URL used to connect to the PowerDNS backend, as well as allowing for certain zone metadata items which will be overriden during zone creation and metadata updates. `account` is always overriden to prevent people from moving zones around between accounts they don't control. What you override will likely depend on how much access users need in your environment.
 
+Zone creation is denied by default: a user can only create a zone whose name exactly matches one of their space-separated `allow-suffix-creation` entries, or ends with an entry that begins with a dot (so `.example.org.` permits `foo.example.org.` but not `example.org.` itself). A user with no `allow-suffix-creation` setting cannot create zones at all, and `allow-suffix-creation = .` lets a user create any zone.
+
 Keys should be generated using something like `dd if=/dev/urandom bs=1 count=16 | xxd -ps` to ensure they have sufficient entropy.
 
 ## Installation
