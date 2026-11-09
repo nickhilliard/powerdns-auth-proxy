@@ -56,7 +56,7 @@ autorestart=true
 
   The tests can also be run on Arch Linux. Install the `powerdns` package.
 
-Additonally a few python modules need to be installed to run the tests (mainly `pytest`): `pip install -r requirements-dev.txt`. You can then run tests by running `pytest -v` inside the source directory.
+Additonally a few python modules need to be installed to run the tests (mainly `pytest`): `pip install ".[dev]"`. You can then run tests by running `pytest -v` inside the source directory.
 
 ## Authenticating
 

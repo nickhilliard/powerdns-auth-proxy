@@ -1,0 +1,34 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "powerdns-auth-proxy"
+version = "0.1"
+description = "Authenticating proxy for PowerDNS's HTTP API"
+authors = [
+    { name = "Catalyst OpsDev", email = "opsdev@catalyst.net.nz" },
+]
+dependencies = [
+    "Flask~=2.0",
+    "requests~=2.0",
+]
+classifiers = [
+    "Development Status :: 2 - Pre-Alpha",
+    "Natural Language :: English",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.6",
+    "Programming Language :: Python :: 3.7",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "pytest-flask",
+]
+
+[project.urls]
+Homepage = "https://github.com/catalyst/powerdns-auth-proxy"
+
+[tool.setuptools]
+packages = ["powerdns_auth_proxy"]
