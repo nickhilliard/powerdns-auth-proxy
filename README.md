@@ -31,7 +31,7 @@ Keys should be generated using something like `dd if=/dev/urandom bs=1 count=16 
 
 ## Installation
 
-We run the application with `waitress` launched by `supervisord`, though any of the standard methods for deploying Flask 1.x applications should work. We recommend using a virtual env to install the dependencies of the application.
+We run the application with `waitress` launched by `supervisord`, though any of the standard methods for deploying Flask applications should work. We recommend using a virtual env to install the dependencies of the application.
 
 An example `supervisord` configuration would be:
 
@@ -50,7 +50,7 @@ autorestart=true
 
 * Ubuntu / Debian
 
-  The officially supported system for testing is Debian or Ubuntu. To start, install the the official PowerDNS 4.1.x upstream packages: `pdns-server` and `pdns-backend-sqlite3`.
+  The officially supported system for testing is Debian or Ubuntu. To start, install PowerDNS 4.5 or later: `pdns-server` and `pdns-backend-sqlite3`.
 
 * Arch
 

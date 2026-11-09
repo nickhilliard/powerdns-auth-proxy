@@ -59,11 +59,10 @@ def client():
         "--socket-dir=%s" % pdns_empty_dir.name,
         "--local-address=127.0.0.1",
         "--local-port=15353",
-        "--master=yes",
+        "--primary=yes",
         "--launch=gsqlite3",
         "--gsqlite3-database=%s" % pdns_db_path,
-        "--default-soa-name=ns1.example.org",
-        "--default-soa-mail=dns.example.org",
+        "--default-soa-content=ns1.example.org dns.example.org 0 10800 3600 604800 3600",
         "--webserver=yes",
         "--webserver-port=18081",
         "--api=yes",
@@ -98,6 +97,8 @@ def client():
 
     # wait for powerdns to come up, in a really ugly way
     for m in range(1, 60):
+        if pdns.poll() is not None:
+            raise Exception("pdns_server exited with status %d" % pdns.returncode)
         try:
             if (
                 requests.get(
@@ -111,6 +112,9 @@ def client():
         except:
             pass
         time.sleep(0.5)
+    else:
+        pdns.terminate()
+        raise Exception("pdns_server API did not come up on port 18081")
 
     yield app.test_client()
 

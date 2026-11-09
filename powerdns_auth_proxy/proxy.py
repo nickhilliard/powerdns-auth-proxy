@@ -276,7 +276,7 @@ def zone_detail(requested_zone):
     DELETE: Delete a zone immediately.
     """
     zone = json_or_none(proxy_to_backend("GET", "zones/%s" % requested_zone))
-    if zone and zone.get("account", None) != g.username:
+    if not zone or zone.get("account", None) != g.username:
         raise Forbidden
 
     if request.method == "GET":  # get metadata
@@ -304,7 +304,7 @@ def zone_notify(requested_zone):
     PUT: Queue a zone for notification to replicas.
     """
     zone = json_or_none(proxy_to_backend("GET", "zones/%s" % requested_zone))
-    if zone and zone.get("account", None) != g.username:
+    if not zone or zone.get("account", None) != g.username:
         raise Forbidden
 
     return proxy_to_backend("PUT", "zones/%s/notify" % requested_zone, None)

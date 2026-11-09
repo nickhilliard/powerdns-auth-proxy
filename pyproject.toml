@@ -14,7 +14,7 @@ authors = [
 ]
 requires-python = ">=3.9"
 dependencies = [
-    "Flask~=2.0",
+    "Flask~=3.0",
     "requests~=2.0",
 ]
 classifiers = [
@@ -34,7 +34,6 @@ Upstream = "https://github.com/catalyst/powerdns-auth-proxy"
 [dependency-groups]
 test = [
     "pytest",
-    "pytest-flask",
 ]
 lint = [
     "flake8",
