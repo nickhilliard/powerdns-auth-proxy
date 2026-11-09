@@ -63,7 +63,8 @@ def create_app(configuration=None):
     users = split_config_values(config, "user:")
     pdns = split_config_values(config, "pdns")[""]
     app.config.from_mapping(
-        PDNS=pdns, USERS=users,
+        PDNS=pdns,
+        USERS=users,
     )
 
     from . import proxy

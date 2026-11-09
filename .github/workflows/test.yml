@@ -7,32 +7,38 @@ on:
 jobs:
   test:
 
-    runs-on: ubuntu-16.04
+    runs-on: ubuntu-24.04
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
+    - uses: actions/setup-python@v5
+      with:
+        python-version: "3.12"
     - name: Install dependencies
       run: |
-        sudo apt-get update && DEBIAN_FRONTEND=noninteractive sudo apt-get install --yes --quiet pdns-server pdns-backend-sqlite3 python3 python3-pip
-        pip3 install ".[dev]"
+        sudo apt-get update && DEBIAN_FRONTEND=noninteractive sudo apt-get install --yes --quiet pdns-server pdns-backend-sqlite3
+        python -m pip install ".[dev]"
     - name: Test with pytest
       run: |
-        python3 -m pytest -v
+        python -m pytest -v
   lint:
 
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-24.04
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
+    - uses: actions/setup-python@v5
+      with:
+        python-version: "3.12"
     - name: Install linters
       run: |
-        pip3 install flake8 black isort
+        python -m pip install flake8 black isort
     - name: Lint with flake8
       run: |
-        python3 -m flake8 .
+        python -m flake8 .
     - name: Lint with isort
       run: |
-        python3 -m isort --check-only -rc .
+        python -m isort --check-only .
     - name: Lint with black
       run: |
-        python3 -m black --check --diff .
+        python -m black --check --diff .
