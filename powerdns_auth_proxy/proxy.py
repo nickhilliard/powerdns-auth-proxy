@@ -93,8 +93,10 @@ def authenticate(f):
         if (
             authentication_method not in ("key", "basic")
             or username not in current_app.config["USERS"]
+            # compare as bytes: compare_digest rejects non-ASCII str arguments
             or not hmac.compare_digest(
-                current_app.config["USERS"][username]["key"], password
+                current_app.config["USERS"][username]["key"].encode("utf-8"),
+                password.encode("utf-8"),
             )
         ):
             return Response(

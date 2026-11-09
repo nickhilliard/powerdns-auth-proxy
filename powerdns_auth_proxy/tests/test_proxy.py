@@ -169,6 +169,18 @@ def test_api_auth(client):
         assert response.status_code > 400
 
 
+def test_api_auth_non_ascii(client):
+    # non-ASCII credentials must be rejected with 401, not crash with 500
+    for credentials in ("demo-example-org:sécret", "dëmo:secret"):
+        response = client.get("/api/v1/servers", headers={"X-API-Key": credentials})
+        assert response.status_code == 401
+        encoded = base64.b64encode(credentials.encode("utf-8")).decode("ascii")
+        response = client.get(
+            "/api/v1/servers", headers={"Authorization": "Basic %s" % encoded}
+        )
+        assert response.status_code == 401
+
+
 def test_api_zone_create(client):
     # zone that the user is not allowed to create because it is not listed at all
     response = client.post(
